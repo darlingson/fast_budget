@@ -22,7 +22,6 @@ import {
     durationWeeks?: number
   }
   
-  // Helper to get multiplier per week based on frequency
   const getFrequencyMultiplier = (frequency: Frequency): number => {
     switch (frequency) {
       case "daily":
@@ -47,12 +46,13 @@ import {
     const [durationWeeks, setDurationWeeks] = useState("")
   
     const [items, setItems] = useState<ExpenseItem[]>([])
+    const [editId, setEditId] = useState<number | null>(null)
   
     const handleAddItem = () => {
       if (!itemName || !itemCost || !itemType) return
   
       const newItem: ExpenseItem = {
-        id: Date.now(),
+        id: editId ?? Date.now(),
         name: itemName,
         cost: Number(itemCost),
         type: itemType,
@@ -63,15 +63,38 @@ import {
             : undefined,
       }
   
-      setItems([...items, newItem])
+      if (editId) {
+        // ✨ Update item
+        setItems((prev) =>
+          prev.map((item) => (item.id === editId ? newItem : item))
+        )
+      } else {
+        // ✨ Add new item
+        setItems([...items, newItem])
+      }
+  
+      // Reset form
       setItemName("")
       setItemCost("")
       setItemType("")
       setFrequency("")
       setDurationWeeks("")
+      setEditId(null)
     }
   
-    // 🔢 Calculate total expenses
+    const handleDelete = (id: number) => {
+      setItems((prev) => prev.filter((item) => item.id !== id))
+    }
+  
+    const handleEdit = (item: ExpenseItem) => {
+      setItemName(item.name)
+      setItemCost(item.cost.toString())
+      setItemType(item.type)
+      setFrequency(item.frequency || "")
+      setDurationWeeks(item.durationWeeks?.toString() || "")
+      setEditId(item.id)
+    }
+  
     const totalExpenses = items.reduce((sum, item) => {
       if (item.type === "recurring" && item.frequency && item.durationWeeks) {
         const multiplier = getFrequencyMultiplier(item.frequency)
@@ -98,19 +121,19 @@ import {
               <h2 className="text-2xl font-semibold text-slate-700 mb-6">1. Budget Settings</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label className="text-slate-600">Budget Period (in weeks)</Label>
+                  <Label>Budget Period (in weeks)</Label>
                   <Input
                     type="number"
                     value={budgetWeeks}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBudgetWeeks(e.target.value)}
+                    onChange={(e) => setBudgetWeeks(e.target.value)}
                   />
                 </div>
                 <div>
-                  <Label className="text-slate-600">Total Budget (K)</Label>
+                  <Label>Total Budget (K)</Label>
                   <Input
                     type="number"
                     value={totalBudget}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTotalBudget(e.target.value)}
+                    onChange={(e) => setTotalBudget(e.target.value)}
                   />
                 </div>
               </div>
@@ -118,13 +141,15 @@ import {
   
             {/* Add Item */}
             <section className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-2xl font-semibold text-slate-700 mb-6">2. Add Expense Item</h2>
+              <h2 className="text-2xl font-semibold mb-6">
+                {editId ? "✏️ Edit Expense Item" : "2. Add Expense Item"}
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div>
                   <Label>Item Name</Label>
                   <Input
                     value={itemName}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setItemName(e.target.value)}
+                    onChange={(e) => setItemName(e.target.value)}
                   />
                 </div>
                 <div>
@@ -132,13 +157,13 @@ import {
                   <Input
                     type="number"
                     value={itemCost}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setItemCost(e.target.value)}
+                    onChange={(e) => setItemCost(e.target.value)}
                   />
                 </div>
                 <div>
                   <Label>Type</Label>
                   <Select value={itemType} onValueChange={setItemType}>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-white border shadow-sm"> {/* ✨ Fix: visible dropdown */}
                       <SelectValue placeholder="Recurring or One-time" />
                     </SelectTrigger>
                     <SelectContent>
@@ -149,40 +174,57 @@ import {
                 </div>
               </div>
   
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label>Frequency (if recurring)</Label>
-                  <Select value={frequency} onValueChange={setFrequency}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select frequency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="daily">Daily</SelectItem>
-                      <SelectItem value="workdays">Workdays</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                    </SelectContent>
-                  </Select>
+              {/* Recurring inputs (conditional display) */}
+              {itemType === "recurring" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label>Frequency</Label>
+                    <Select value={frequency} onValueChange={setFrequency}>
+                      <SelectTrigger className="bg-white border shadow-sm">
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="workdays">Workdays</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Duration (in weeks)</Label>
+                    <Input
+                      type="number"
+                      value={durationWeeks}
+                      onChange={(e) => setDurationWeeks(e.target.value)}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label>Duration (in weeks)</Label>
-                  <Input
-                    type="number"
-                    value={durationWeeks}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDurationWeeks(e.target.value)}
-                  />
-                </div>
-              </div>
+              )}
   
-              <Button className="mt-6" onClick={handleAddItem}>
-                ➕ Add Item
-              </Button>
+              <div className="mt-6 flex gap-4">
+                <Button onClick={handleAddItem}>
+                  {editId ? "✅ Update Item" : "➕ Add Item"}
+                </Button>
+                {editId && (
+                  <Button variant="secondary" onClick={() => {
+                    setItemName("")
+                    setItemCost("")
+                    setItemType("")
+                    setFrequency("")
+                    setDurationWeeks("")
+                    setEditId(null)
+                  }}>
+                    Cancel
+                  </Button>
+                )}
+              </div>
             </section>
           </div>
   
           {/* RIGHT COLUMN */}
           <div className="space-y-8">
             {/* Planned Items */}
-            <section className="bg-white p-6 rounded-lg shadow">
+            <section className="bg-white p-6 rounded-lg shadow h-[400px] overflow-y-auto"> {/* ✨ Fix: Scrollable */}
               <h2 className="text-2xl font-semibold mb-4">3. Planned Items</h2>
               {items.length === 0 ? (
                 <p className="text-slate-400">No items yet.</p>
@@ -208,6 +250,10 @@ import {
                           ) : (
                             "One-time expense"
                           )}
+                        </div>
+                        <div className="mt-2 flex gap-2 text-sm">
+                          <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>Edit</Button>
+                          <Button variant="destructive" size="sm" className="bg-red-600" onClick={() => handleDelete(item.id)}>Delete</Button>
                         </div>
                       </li>
                     )
