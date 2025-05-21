@@ -36,8 +36,8 @@ import {
   }
   
   export default function BudgetApp() {
-    const [budgetWeeks, setBudgetWeeks] = useState("4")
-    const [totalBudget, setTotalBudget] = useState("100000")
+    const [budgetWeeks, setBudgetWeeks] = useState("")
+    const [totalBudget, setTotalBudget] = useState("")
   
     const [itemName, setItemName] = useState("")
     const [itemCost, setItemCost] = useState("")
@@ -125,7 +125,7 @@ import {
                   <Input
                     type="number"
                     value={budgetWeeks}
-                    onChange={(e) => setBudgetWeeks(e.target.value)}
+                    onChange={(e:React.ChangeEvent<HTMLInputElement>) => setBudgetWeeks(e.target.value)}
                   />
                 </div>
                 <div>
@@ -133,7 +133,7 @@ import {
                   <Input
                     type="number"
                     value={totalBudget}
-                    onChange={(e) => setTotalBudget(e.target.value)}
+                    onChange={(e:React.ChangeEvent<HTMLInputElement>) => setTotalBudget(e.target.value)}
                   />
                 </div>
               </div>
@@ -149,7 +149,7 @@ import {
                   <Label>Item Name</Label>
                   <Input
                     value={itemName}
-                    onChange={(e) => setItemName(e.target.value)}
+                    onChange={(e:React.ChangeEvent<HTMLInputElement>) => setItemName(e.target.value)}
                   />
                 </div>
                 <div>
@@ -157,7 +157,7 @@ import {
                   <Input
                     type="number"
                     value={itemCost}
-                    onChange={(e) => setItemCost(e.target.value)}
+                    onChange={(e:React.ChangeEvent<HTMLInputElement>) => setItemCost(e.target.value)}
                   />
                 </div>
                 <div>
@@ -195,7 +195,7 @@ import {
                     <Input
                       type="number"
                       value={durationWeeks}
-                      onChange={(e) => setDurationWeeks(e.target.value)}
+                      onChange={(e:React.ChangeEvent<HTMLInputElement>) => setDurationWeeks(e.target.value)}
                     />
                   </div>
                 </div>
