@@ -163,13 +163,13 @@ import {
                 </div>
                 <div>
                   <Label>Type</Label>
-                  <Select value={itemType} onValueChange={setItemType}>
+                  <Select value={itemType} onValueChange={(value) => setItemType(value as ItemType)}>
                     <SelectTrigger className="bg-white border shadow-sm"> {/* ✨ Fix: visible dropdown */}
                       <SelectValue placeholder="Recurring or One-time" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="recurring">Recurring</SelectItem>
-                      <SelectItem value="one-time">One-time</SelectItem>
+                      <SelectItem value={"recurring" as ItemType}>Recurring</SelectItem>
+                      <SelectItem value={"one-time" as ItemType}>One-time</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -180,7 +180,7 @@ import {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label>Frequency</Label>
-                    <Select value={frequency} onValueChange={setFrequency}>
+                    <Select value={frequency} onValueChange={(value) => setFrequency(value as Frequency)}>
                       <SelectTrigger className="bg-white border shadow-sm">
                         <SelectValue placeholder="Select frequency" />
                       </SelectTrigger>
