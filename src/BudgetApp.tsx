@@ -15,6 +15,7 @@ import { useRef } from "react"
 
 type Frequency = "daily" | "weekly" | "workdays"
 type ItemType = "recurring" | "one-time"
+type Category = "food" | "rent" | "transportation" | "entertainment" | "other"
 
 type ExpenseItem = {
     id: number
@@ -23,6 +24,7 @@ type ExpenseItem = {
     type: ItemType
     frequency?: Frequency
     durationWeeks?: number
+    category: Category
 }
 
 const getFrequencyMultiplier = (frequency: Frequency): number => {
@@ -68,7 +70,7 @@ export default function BudgetApp() {
                     item.type === "recurring" && item.frequency && item.durationWeeks
                         ? item.cost * getFrequencyMultiplier(item.frequency) * item.durationWeeks
                         : item.cost;
-                listItem.innerHTML = `${item.name} - K${totalCost.toLocaleString()}`;
+                listItem.innerHTML = `${item.name} - K${totalCost.toLocaleString()} - ${item.category}`;
                 itemList.appendChild(listItem);
             });
             printLayout.appendChild(itemList);
@@ -114,9 +116,10 @@ export default function BudgetApp() {
 
     const [items, setItems] = useState<ExpenseItem[]>([])
     const [editId, setEditId] = useState<number | null>(null)
+    const [category, setCategory] = useState<Category | "">("")
 
     const handleAddItem = () => {
-        if (!itemName || !itemCost || !itemType) return
+        if (!itemName || !itemCost || !itemType || !category) return
 
         const newItem: ExpenseItem = {
             id: editId ?? Date.now(),
@@ -128,6 +131,7 @@ export default function BudgetApp() {
                 itemType === "recurring"
                     ? Number(durationWeeks || budgetWeeks)
                     : undefined,
+            category,
         }
 
         if (editId) {
@@ -147,6 +151,7 @@ export default function BudgetApp() {
         setFrequency("")
         setDurationWeeks("")
         setEditId(null)
+        setCategory("")
     }
 
     const handleDelete = (id: number) => {
@@ -159,6 +164,7 @@ export default function BudgetApp() {
         setItemType(item.type)
         setFrequency(item.frequency || "")
         setDurationWeeks(item.durationWeeks?.toString() || "")
+        setCategory(item.category)
         setEditId(item.id)
     }
 
@@ -248,6 +254,21 @@ export default function BudgetApp() {
                                         </SelectContent>
                                     </Select>
                                 </div>
+                            </div>
+                            <div>
+                                <Label>Category</Label>
+                                <Select value={category} onValueChange={(value) => setCategory(value as Category)}>
+                                    <SelectTrigger className="bg-white border shadow-sm">
+                                        <SelectValue placeholder="Select category" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value={"food" as Category}>Food</SelectItem>
+                                        <SelectItem value={"rent" as Category}>Rent</SelectItem>
+                                        <SelectItem value={"transportation" as Category}>Transportation</SelectItem>
+                                        <SelectItem value={"entertainment" as Category}>Entertainment</SelectItem>
+                                        <SelectItem value={"other" as Category}>Other</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             {/* Recurring inputs (conditional display) */}
@@ -348,6 +369,9 @@ export default function BudgetApp() {
                                                     <div className="flex justify-between font-medium">
                                                         <span>{item.name}</span>
                                                         <span className="text-slate-700 font-bold">K{totalCost.toLocaleString()}</span>
+                                                    </div>
+                                                    <div className="text-sm text-slate-500 mt-1">
+                                                        <span>{item.category}</span>
                                                     </div>
                                                     <div className="text-sm text-slate-500 mt-1">
                                                         {item.type === "recurring" && item.frequency && item.durationWeeks ? (
