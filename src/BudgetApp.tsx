@@ -245,7 +245,7 @@ export default function BudgetApp() {
                                 <div>
                                     <Label>Type</Label>
                                     <Select value={itemType} onValueChange={(value) => setItemType(value as ItemType)}>
-                                        <SelectTrigger className="bg-white border shadow-sm"> {/* ✨ Fix: visible dropdown */}
+                                        <SelectTrigger className="bg-white border shadow-sm max-w-full truncate">
                                             <SelectValue placeholder="Recurring or One-time" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-white text-black shadow-md border border-gray-200 z-50">
