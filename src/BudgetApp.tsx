@@ -10,6 +10,8 @@ import { Label } from "./components/ui/label"
 import { useState } from "react"
 import { Input } from "./components/ui/input"
 import { motion, AnimatePresence } from "framer-motion"
+import html2pdf from "html2pdf.js"
+import { useRef } from "react"
 
 type Frequency = "daily" | "weekly" | "workdays"
 type ItemType = "recurring" | "one-time"
@@ -37,6 +39,70 @@ const getFrequencyMultiplier = (frequency: Frequency): number => {
 }
 
 export default function BudgetApp() {
+    const exportRef = useRef(null)
+
+    const handleExportPDF = async () => {
+        try {
+            console.log("Exporting PDF...");
+            if (!exportRef.current) return;
+    
+            // Create a hidden simplified layout for PDF export
+            const printLayout = document.createElement("div");
+            printLayout.style.display = "none"; // Changed visibility to display: none
+    
+            // Create the simplified layout
+            const header = document.createElement("h1");
+            header.innerText = "Budget Summary";
+            printLayout.appendChild(header);
+    
+            // Add budget details
+            const budgetDetails = document.createElement("p");
+            budgetDetails.innerHTML = `Total Budget: K${totalBudget} | Period: ${budgetWeeks} weeks`;
+            printLayout.appendChild(budgetDetails);
+    
+            // Add each item in a simple list
+            const itemList = document.createElement("ul");
+            items.forEach((item) => {
+                const listItem = document.createElement("li");
+                const totalCost =
+                    item.type === "recurring" && item.frequency && item.durationWeeks
+                        ? item.cost * getFrequencyMultiplier(item.frequency) * item.durationWeeks
+                        : item.cost;
+                listItem.innerHTML = `${item.name} - K${totalCost.toLocaleString()}`;
+                itemList.appendChild(listItem);
+            });
+            printLayout.appendChild(itemList);
+    
+            // Add summary (total expenses and remaining budget)
+            const summary = document.createElement("p");
+            summary.innerHTML = `Total Expenses: K${totalExpenses.toLocaleString()} | Remaining Budget: K${remaining.toLocaleString()}`;
+            printLayout.appendChild(summary);
+    
+            // Append the hidden layout to the body and then export it
+            document.body.appendChild(printLayout);
+    
+            const opt = {
+                margin: 0.5,
+                filename: "budget-summary.pdf",
+                image: { type: "jpeg", quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+            };
+    
+            const worker = html2pdf().set(opt).from(printLayout);
+            await worker.toPdf().get("pdf").then((pdf:any) => {
+                pdf.save();
+            });
+    
+            // Clean up by removing the hidden layout from the DOM
+            document.body.removeChild(printLayout);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+    
+
+
     const [budgetWeeks, setBudgetWeeks] = useState("")
     const [totalBudget, setTotalBudget] = useState("")
 
@@ -119,7 +185,10 @@ export default function BudgetApp() {
                     <h1 className="text-4xl font-bold text-slate-800">🧾 Simple Budget Planner</h1>
                     <p className="text-slate-500 text-sm mt-2">Plan your spending clearly & simply</p>
                 </header>
-
+                <div className="text-right mb-4">
+                    <Button onClick={()=>handleExportPDF()} className="bg-indigo-600 text-white">📄 Export to PDF</Button>
+                </div>
+                <div ref={exportRef}>
                 <main className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* LEFT COLUMN */}
                     <div className="space-y-8">
@@ -316,6 +385,7 @@ export default function BudgetApp() {
                         </motion.section>
                     </div>
                 </main>
+                </div>
                 <footer className="text-center text-gray-500 text-sm mt-4 border-t pt-4">
                     App by Darlingson
                 </footer>
