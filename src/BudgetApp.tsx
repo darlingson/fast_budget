@@ -248,7 +248,7 @@ export default function BudgetApp() {
                                         <SelectTrigger className="bg-white border shadow-sm"> {/* ✨ Fix: visible dropdown */}
                                             <SelectValue placeholder="Recurring or One-time" />
                                         </SelectTrigger>
-                                        <SelectContent>
+                                        <SelectContent className="bg-white text-black shadow-md border border-gray-200 z-50">
                                             <SelectItem value={"recurring" as ItemType}>Recurring</SelectItem>
                                             <SelectItem value={"one-time" as ItemType}>One-time</SelectItem>
                                         </SelectContent>
@@ -261,7 +261,7 @@ export default function BudgetApp() {
                                     <SelectTrigger className="bg-white border shadow-sm">
                                         <SelectValue placeholder="Select category" />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent className="bg-white text-black shadow-md border border-gray-200 z-50">
                                         <SelectItem value={"food" as Category}>Food</SelectItem>
                                         <SelectItem value={"rent" as Category}>Rent</SelectItem>
                                         <SelectItem value={"transportation" as Category}>Transportation</SelectItem>
@@ -280,7 +280,7 @@ export default function BudgetApp() {
                                             <SelectTrigger className="bg-white border shadow-sm">
                                                 <SelectValue placeholder="Select frequency" />
                                             </SelectTrigger>
-                                            <SelectContent>
+                                            <SelectContent className="bg-white text-black shadow-md border border-gray-200 z-50">
                                                 <SelectItem value="daily">Daily</SelectItem>
                                                 <SelectItem value="workdays">Workdays</SelectItem>
                                                 <SelectItem value="weekly">Weekly</SelectItem>
